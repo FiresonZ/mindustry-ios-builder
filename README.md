@@ -15,6 +15,7 @@
 
 <div align="center">
 
+  _[在线下载页](https://firesonz.github.io/mindustry-ios-builder/)_ ·
   _[Releases](https://github.com/FiresonZ/mindustry-ios-builder/releases)_ ·
   _[Actions](https://github.com/FiresonZ/mindustry-ios-builder/actions)_ ·
   _[上游仓库](https://github.com/Anuken/Mindustry)_
@@ -72,6 +73,8 @@
 ```
 /
 ├── .github/workflows/ios-ipa-build.yml    CI：check-version → build-ipa → bump & release → LAST_VERSION 回写
+├── .github/workflows/github-pages.yml     GitHub Pages：部署实时版本下载页
+├── site/index.html                        实时读取最新 Release 并提供 IPA 下载
 ├── scripts/
 │   ├── check-version.sh                   查最新 tag / 对比 LAST_VERSION / 输出 NEEDS_BUILD、RELEASE_TAG 等
 │   ├── build-ipa.sh                       clone Mindustry+Arc、补丁 build.gradle 与 robovm.xml、解 MetalANGLEKit、执行 ios:incrementConfig + ios:deploy
@@ -175,6 +178,9 @@ RoboVM 2.3.24 `PlatformFilter(SystemFilter)` 理论上能解析 `${user.home}`�
 ---
 
 ## 下载
+
+- **在线下载页**：[`firesonz.github.io/mindustry-ios-builder`](https://firesonz.github.io/mindustry-ios-builder/)，打开时实时读取 `releases/latest`，自动显示最新版号并定位 IPA 下载链接。
+- 首次启用需要在仓库 `Settings → Pages → Build and deployment` 中将 `Source` 设为 `GitHub Actions`；之后 `site/` 变化或新 Release 发布时，`Deploy download page` 工作流会自动部署。
 
 | [![GitHub Releases](https://img.shields.io/badge/Release-下载-blue?logo=github)](https://github.com/FiresonZ/mindustry-ios-builder/releases) | [![Actions Artifacts](https://img.shields.io/badge/Actions-Artifacts-lightgrey?logo=githubactions)](https://github.com/FiresonZ/mindustry-ios-builder/actions) |
 |---|---|

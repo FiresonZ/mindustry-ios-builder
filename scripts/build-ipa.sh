@@ -606,8 +606,13 @@ cp "$IPA_FILE" "$IPA_FINAL"
 IPA_TMP_DIR="$(mktemp -d)"
 unzip -q -o "$IPA_FINAL" -d "$IPA_TMP_DIR"
 check_iosgles20() {
-  nm -g -arch arm64 "$1" 2>/dev/null | grep -q "IOSGLES20_init" \
-    || nm -g "$1" 2>/dev/null | grep -q "IOSGLES20_init"
+  local binary="$1"
+  local symbols
+  symbols=$(nm -arch arm64 -gU "$binary" 2>/dev/null || nm -gU "$binary" 2>/dev/null || true)
+  if printf '%s\n' "$symbols" | grep -qE '[_]?IOSGLES20_init($|[^[:alnum:]_])'; then
+    return 0
+  fi
+  otool -Iv "$binary" 2>/dev/null | grep -qE '[_]?IOSGLES20_init($|[^[:alnum:]_])'
 }
 SYM_OK="no"
 # 诊断：打印 .app 内 Frameworks 目录与嵌入的 framework 列表，便于定位缺失项
@@ -621,7 +626,8 @@ if [ -n "$IPA_APP_BIN" ] && check_iosgles20 "$IPA_APP_BIN"; then
   echo "    符号在主可执行文件中: $(basename "$IPA_APP_BIN")" >&2
 else
   for fw in $(find "$IPA_TMP_DIR" -name "*.framework" -type d 2>/dev/null); do
-    if check_iosgles20 "$fw/$(basename "$fw" .framework)"; then
+    FW_BIN="$fw/$(basename "$fw" .framework)"
+    if [ -f "$FW_BIN" ] && check_iosgles20 "$FW_BIN"; then
       SYM_OK="yes"
       echo "    符号在嵌入 framework 中: $(basename "$fw")" >&2
       break

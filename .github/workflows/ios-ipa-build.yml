@@ -200,7 +200,8 @@ jobs:
           echo "Display Version  : ${{ needs.check-version.outputs.display_ver }}"
           echo "Reason           : ${{ needs.check-version.outputs.reason }}"
           echo "macOS Version    : $(sw_vers -productVersion)"
-          echo "Xcode Version    : $(xcodebuild -version | head -1)"
+          XCODE_VERSION=$(xcodebuild -version | sed -n '1p')
+          echo "Xcode Version    : ${XCODE_VERSION}"
           echo "Signing Mode     : UNSIGNED (TrollStore / AltStore / Sideloadly 安装)"
 
       - name: Setup JDK 17 (Temurin)

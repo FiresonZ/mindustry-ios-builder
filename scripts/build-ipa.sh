@@ -430,7 +430,8 @@ if [ ! -s "$IOS_LIBS_DIR_EARLY/libarc-freetype.a" ]; then
     [ -z "$JARLIST" ] && continue
     TMP_E=$(mktemp -d)
     for J in $JARLIST; do
-      if unzip -l "$J" 2>/dev/null | grep -q 'META-INF/robovm/ios/libs/libarc-freetype\.a'; then
+      JAR_ENTRIES=$(unzip -l "$J" 2>/dev/null || true)
+      if [[ "$JAR_ENTRIES" == *"META-INF/robovm/ios/libs/libarc-freetype.a"* ]]; then
         unzip -o -q -j -d "$TMP_E" "$J" 'META-INF/robovm/ios/libs/libarc-freetype.a' >/dev/null 2>&1 || true
         if [ -f "$TMP_E/libarc-freetype.a" ] && [ ! -s "$IOS_LIBS_DIR_EARLY/libarc-freetype.a" ]; then
           cp -f "$TMP_E/libarc-freetype.a" "$IOS_LIBS_DIR_EARLY/libarc-freetype.a"
@@ -608,11 +609,13 @@ unzip -q -o "$IPA_FINAL" -d "$IPA_TMP_DIR"
 check_iosgles20() {
   local binary="$1"
   local symbols
+  local dynamic_symbols
   symbols=$(nm -arch arm64 -gU "$binary" 2>/dev/null || nm -gU "$binary" 2>/dev/null || true)
-  if printf '%s\n' "$symbols" | grep -qE '[_]?IOSGLES20_init($|[^[:alnum:]_])'; then
+  if [[ "$symbols" =~ _?IOSGLES20_init([^[:alnum:]_]|$) ]]; then
     return 0
   fi
-  otool -Iv "$binary" 2>/dev/null | grep -qE '[_]?IOSGLES20_init($|[^[:alnum:]_])'
+  dynamic_symbols=$(otool -Iv "$binary" 2>/dev/null || true)
+  [[ "$dynamic_symbols" =~ _?IOSGLES20_init([^[:alnum:]_]|$) ]]
 }
 SYM_OK="no"
 # 诊断：打印 .app 内 Frameworks 目录与嵌入的 framework 列表，便于定位缺失项

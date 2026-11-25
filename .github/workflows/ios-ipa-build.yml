@@ -182,7 +182,7 @@ jobs:
     name: Build iOS IPA (${{ needs.check-version.outputs.release_tag }})
     needs: check-version
     if: needs.check-version.outputs.needs_build == 'true'
-    runs-on: macos-14
+    runs-on: macos-15
     timeout-minutes: 180
     steps:
       - uses: actions/checkout@v7
